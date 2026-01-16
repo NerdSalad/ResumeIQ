@@ -4,16 +4,17 @@ import { formatSize } from '~/lib/utils'
 
 interface FileUploaderProps {
     onFileSelect?: (file: File | null) => void;
+    file?: File | null;
 }
 
-const FileUploader = ({ onFileSelect }: FileUploaderProps) => {
+const FileUploader = ({ onFileSelect, file }: FileUploaderProps) => {
 
     const onDrop = useCallback((acceptedFiles: File[]) => {
-        const file = acceptedFiles[0] || null;
+        const file = acceptedFiles[0];
         onFileSelect?.(file);
     }, [onFileSelect])
 
-    const { getRootProps, getInputProps, isDragActive, acceptedFiles } = useDropzone({
+    const { getRootProps, getInputProps, isDragActive, acceptedFiles, } = useDropzone({
         onDrop,
         multiple: false,
         accept: {
@@ -21,8 +22,6 @@ const FileUploader = ({ onFileSelect }: FileUploaderProps) => {
         },
         maxSize: 20 * 1024 * 1024
     })
-
-    const file = acceptedFiles[0] || null
 
     return (
         <div className='w-full gradient-border'>
@@ -45,9 +44,7 @@ const FileUploader = ({ onFileSelect }: FileUploaderProps) => {
                             <button 
                                 type="button"
                                 className='p-2 cursor-pointer' 
-                                onClick={(e) => {
-                                    e.preventDefault();
-                                    e.stopPropagation();
+                                onClick={() => {
                                     onFileSelect?.(null)
                                 }}
                             >

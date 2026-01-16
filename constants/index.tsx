@@ -89,7 +89,7 @@ export const resumes: Resume[] = [
       },
     },
   },
-    {
+  {
     id: "4",
     companyName: "Netflix",
     jobTitle: "Backend Developer",
@@ -181,68 +181,90 @@ export const resumes: Resume[] = [
   },
 ];
 
-export const AIResponseFormat = `
-      interface Feedback {
-      overallScore: number; //max 100
-      ATS: {
-        score: number; //rate based on ATS suitability
-        tips: {
-          type: "good" | "improve";
-          tip: string; //give 3-4 tips
-        }[];
-      };
-      toneAndStyle: {
-        score: number; //max 100
-        tips: {
-          type: "good" | "improve";
-          tip: string; //make it a short "title" for the actual explanation
-          explanation: string; //explain in detail here
-        }[]; //give 3-4 tips
-      };
-      content: {
-        score: number; //max 100
-        tips: {
-          type: "good" | "improve";
-          tip: string; //make it a short "title" for the actual explanation
-          explanation: string; //explain in detail here
-        }[]; //give 3-4 tips
-      };
-      structure: {
-        score: number; //max 100
-        tips: {
-          type: "good" | "improve";
-          tip: string; //make it a short "title" for the actual explanation
-          explanation: string; //explain in detail here
-        }[]; //give 3-4 tips
-      };
-      skills: {
-        score: number; //max 100
-        tips: {
-          type: "good" | "improve";
-          tip: string; //make it a short "title" for the actual explanation
-          explanation: string; //explain in detail here
-        }[]; //give 3-4 tips
-      };
-    }`;
+export const AIResponseFormat = `{
+  "overallScore": 85,
+  "ATS": {
+    "score": 90,
+    "tips": [
+      {
+        "type": "good",
+        "tip": "Good use of keywords"
+      },
+      {
+        "type": "improve",
+        "tip": "Add more metrics"
+      }
+    ]
+  },
+  "toneAndStyle": {
+    "score": 80,
+    "tips": [
+      {
+        "type": "good",
+        "tip": "Professional tone",
+        "explanation": "The resume uses professional language throughout."
+      }
+    ]
+  },
+  "content": {
+    "score": 75,
+    "tips": [
+      {
+        "type": "improve",
+        "tip": "Quantify achievements",
+        "explanation": "Use numbers to show impact."
+      }
+    ]
+  },
+  "structure": {
+    "score": 85,
+    "tips": [
+      {
+        "type": "good",
+        "tip": "Clear headings"
+      }
+    ]
+  },
+  "skills": {
+    "score": 90,
+    "tips": [
+      {
+        "type": "good",
+        "tip": "Relevant skills listed"
+      }
+    ]
+  }
+}`;
 
 export const prepareInstructions = ({
   jobTitle,
   jobDescription,
-  AIResponseFormat,
 }: {
   jobTitle: string;
   jobDescription: string;
-  AIResponseFormat: string;
-}) =>
-  `You are an expert in ATS (Applicant Tracking System) and resume analysis.
-  Please analyze and rate this resume and suggest how to improve it.
-  The rating can be low if the resume is bad.
-  Be thorough and detailed. Don't be afraid to point out any mistakes or areas for improvement.
-  If there is a lot to improve, don't hesitate to give low scores. This is to help the user to improve their resume.
-  If available, use the job description for the job user is applying to to give more detailed feedback.
-  If provided, take the job description into consideration.
-  The job title is: ${jobTitle}
-  The job description is: ${jobDescription}
-  Provide the feedback using the following format: ${AIResponseFormat}
-  Return the analysis as a JSON object, without any other text and without the backticks.
-  Do not include any other text or comments.`;
+}) => `
+You are an expert in ATS (Applicant Tracking System) and resume evaluation.
+
+Analyze the provided resume and give an honest, critical assessment.
+If the resume is weak, assign low scores. Do not inflate ratings.
+
+Use the job title and job description below to tailor the feedback:
+Job Title: ${jobTitle}
+Job Description: ${jobDescription}
+
+Rules:
+- All scores must be between 0 and 100
+- Overall score should reflect the quality of all sections combined
+- Provide 3–4 tips per section
+- Clearly distinguish between strengths ("good") and improvements ("improve")
+- ATS scores are optimistic and keyword-driven
+- Most qualified resumes score between 65 and 85
+- Do NOT grade like an academic evaluator
+- Do NOT penalize missing metrics unless impact is unclear
+- Focus primarily on keyword overlap and role relevance
+
+Return the response strictly as a JSON object following this format:
+${AIResponseFormat}
+
+Do NOT include backticks, markdown, comments, or any text outside the JSON.
+`;
