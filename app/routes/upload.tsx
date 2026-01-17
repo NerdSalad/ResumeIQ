@@ -1,16 +1,16 @@
-import React from 'react'
-import { useState } from 'react'
-import Navbar from '~/components/Navbar'
-import FileUploader from '~/components/FileUploader'
+import React, { useState } from 'react';
+import Navbar from '~/components/Navbar';
+import FileUploader from '~/components/FileUploader';
 import { usePuterStore } from '~/lib/puter';
-import { data, useNavigate } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import { convertPdfToImage } from '~/lib/pdf2img';
 import { generateUUID } from '~/lib/utils';
 import { prepareInstructions } from '../../constants';
+import Footer from '~/components/Footer';
 
 type FormEvent<T> = React.FormEvent<T>;
 
-const upload = () => {
+const Upload = () => {
 
     const { auth, isLoading, fs, ai, kv } = usePuterStore();
     const navigate = useNavigate();
@@ -71,8 +71,15 @@ const upload = () => {
         if (!feedback)
             return setStatusText("Error: Failed to analyze resume");
 
-        const feedbackText = typeof feedback.message.content === 'string' ? feedback.message.content : feedback.message.content[0].text
+        // Handle both string and array content responses from Claude
+        let feedbackText = "";
+        if (typeof feedback.message.content === 'string') {
+            feedbackText = feedback.message.content;
+        } else if (Array.isArray(feedback.message.content)) {
+            feedbackText = feedback.message.content[0].text;
+        }
 
+        // @ts-ignore - We'll assume the structure is correct for now or could add validation
         data.feedback = JSON.parse(feedbackText)
 
         await kv.set(`resume:${uuid}`, JSON.stringify(data));
@@ -98,9 +105,9 @@ const upload = () => {
     }
 
     return (
-        <main className='bg-[url("/images/bg-main.svg")] bg-cover'>
+        <main className='bg-[url("/images/bg-main.svg")] bg-cover min-h-screen flex flex-col'>
             <Navbar />
-            <section className='main-section'>
+            <section className='main-section flex-1'>
                 <div className='page-heading py-16'>
                     <h1>Smart feedback for your dream job!</h1>
                     {isProcessing ? (
@@ -135,8 +142,9 @@ const upload = () => {
                     )}
                 </div>
             </section>
+            <Footer />
         </main>
     )
 }
 
-export default upload
+export default Upload;

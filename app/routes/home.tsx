@@ -13,12 +13,15 @@ export function meta({ }: Route.MetaArgs) {
   ];
 }
 
+import Footer from "../components/Footer";
+
 export default function Home() {
 
   const { auth, kv } = usePuterStore();
   const navigate = useNavigate();
   const [resumes, setResumes] = useState<Resume[]>([]);
   const [loadingResumes, setLoadingResumes] = useState(true);
+  const hasResumes = !loadingResumes && resumes.length > 0;
 
   useEffect(() => {
     if (!auth.isAuthenticated) {
@@ -44,9 +47,9 @@ export default function Home() {
   }, [])
 
   return (
-    <main className="bg-[url('/images/bg-main.svg')] bg-cover">
-      <Navbar />
-      <section className="main-section">
+    <main className="bg-[url('/images/bg-main.svg')] bg-cover min-h-screen flex flex-col">
+      <Navbar showUpload={hasResumes} showWipe={hasResumes}/>
+      <section className="main-section flex-1">
         <div className="page-heading py-16">
           <h1>Track Your Applications & Resume Ratings</h1>
           {!loadingResumes && resumes.length === 0 ? (
@@ -75,6 +78,7 @@ export default function Home() {
             </div>
         )}
       </section>
+      <Footer />
     </main>
   );
 }
