@@ -17,7 +17,7 @@ import Footer from "../components/Footer";
 
 export default function Home() {
 
-  const { auth, kv } = usePuterStore();
+  const { auth, kv, fs } = usePuterStore();
   const navigate = useNavigate();
   const [resumes, setResumes] = useState<Resume[]>([]);
   const [loadingResumes, setLoadingResumes] = useState(true);
@@ -46,6 +46,27 @@ export default function Home() {
 
   }, [])
 
+      const handleDelete = async (resume: Resume) => {
+        console.log("Deleting resume:", resume.id);
+        try {
+            await kv.delete("resume:" + resume.id);
+            console.log("Deleted from KV");
+            
+            try {
+                await fs.delete(resume.imagePath);
+                console.log("Deleted from FS");
+            } catch (fsError) {
+                console.warn("Failed to delete image file:", fsError);
+            }
+            
+            const newResumes = resumes.filter((r) => r.id !== resume.id);
+            setResumes(newResumes);
+        } catch (error) {
+            console.error("Error deleting resume:", error);
+            alert("Failed to delete resume. Please try again.");
+        }
+      }
+
   return (
     <main className="bg-[url('/images/bg-main.svg')] bg-cover min-h-screen flex flex-col">
       <Navbar showUpload={hasResumes} showWipe={hasResumes}/>
@@ -67,7 +88,7 @@ export default function Home() {
         {!loadingResumes && resumes.length > 0 && (
           <div className="resumes-section">
             {resumes.map((resume) => (
-              <ResumeCard key={resume.id} resume={resume} />
+              <ResumeCard key={resume.id} resume={resume} onDelete={handleDelete} />
             ))}
           </div>
         )}
